@@ -45,6 +45,11 @@ export const config = {
     apiSecret: process.env.CLOUDINARY_API_SECRET || '',
   },
 
+  ai: {
+    openRouterApiKey: process.env.OPENROUTER_API_KEY || process.env.OPENAI_API_KEY || '',
+    openRouterModel: process.env.OPENROUTER_MODEL || 'nvidia/nemotron-3.5-super-vl:free',
+  },
+
   rateLimit: {
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100, // limit each IP to 100 requests per windowMs

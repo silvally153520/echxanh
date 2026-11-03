@@ -1,21 +1,17 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { Bot, CalendarCheck, ChevronDown, Headphones, MessageCircle, Send, Trash2, X } from 'lucide-react';
+import { supportApi } from '../../services/api';
 
 type ChatMessage = {
   id: number;
   role: 'assistant' | 'customer';
   text: string;
-  action?: {
-    label: string;
-    href: string;
-  };
 };
 
 const welcomeMessage: ChatMessage = {
   id: 0,
   role: 'assistant',
-  text: 'Xin chào! Mình là trợ lý sieuechxanh. Mình có thể giúp bạn tìm phòng, đặt phòng hoặc tra cứu đơn hàng.',
+  text: 'Xin chào! Mình là trợ lý sieuechxanh. Mình có thể giúp bạn tìm phòng, hướng dẫn đặt phòng hoặc tra cứu đơn hàng.',
 };
 
 const quickQuestions = [
@@ -24,74 +20,11 @@ const quickQuestions = [
   { label: 'Tra cứu đơn', message: 'Tôi muốn xem đơn đặt phòng', icon: Headphones },
 ];
 
-const normalize = (value: string) =>
-  value.toLocaleLowerCase('vi').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
-
-const getReply = (message: string): Omit<ChatMessage, 'id' | 'role'> => {
-  const text = normalize(message);
-
-  if (/\b(chao|xin chao|hello|hi)\b/.test(text)) {
-    return { text: 'Xin chào bạn! Bạn đang cần hỗ trợ tìm phòng, đặt phòng hay quản lý đơn đặt phòng?' };
-  }
-
-  if (/(hoan tien|huy.*(phong|don|dat)|doi lich|doi ngay|chinh sach huy)/.test(text)) {
-    return {
-      text: 'Bạn có thể xem và gửi yêu cầu hủy đơn trong mục Đặt phòng của tôi. Điều kiện hoàn tiền có thể tùy thuộc vào từng chỗ nghỉ; nếu cần tư vấn thêm, hãy liên hệ đội ngũ hỗ trợ.',
-      action: { label: 'Đến đơn đặt phòng', href: '/dashboard' },
-    };
-  }
-
-  if (/(don dat|ma don|tra cuu|kiem tra don|xem don|trang thai don)/.test(text)) {
-    return {
-      text: 'Đăng nhập để xem danh sách đơn, trạng thái và thông tin chi tiết chuyến đi của bạn.',
-      action: { label: 'Xem đơn đặt phòng', href: '/dashboard' },
-    };
-  }
-
-  if (/(gia|bao nhieu|thanh toan|chi phi|phi dich vu)/.test(text)) {
-    return {
-      text: 'Giá mỗi đêm được hiển thị trên trang chi tiết chỗ nghỉ. Bạn hãy chọn ngày nhận/trả phòng để xem tổng tiền trước khi gửi yêu cầu đặt phòng.',
-      action: { label: 'Khám phá chỗ nghỉ', href: '/properties' },
-    };
-  }
-
-  if (/(dat phong|huong dan dat|cach dat|book)/.test(text)) {
-    return {
-      text: 'Bạn chọn chỗ nghỉ phù hợp, nhập ngày nhận/trả phòng cùng số khách rồi nhấn “Đặt phòng”. Nếu chưa đăng nhập, hệ thống sẽ hướng dẫn bạn đăng nhập trước.',
-      action: { label: 'Bắt đầu tìm phòng', href: '/properties' },
-    };
-  }
-
-  if (/(tim phong|khach san|homestay|resort|biet thu|cho nghi|phong o)/.test(text)) {
-    return {
-      text: 'Mở trang tìm phòng để xem các chỗ nghỉ, lọc theo địa điểm, ngày lưu trú và nhu cầu của bạn.',
-      action: { label: 'Tìm chỗ nghỉ', href: '/properties' },
-    };
-  }
-
-  if (/(dang nhap|tai khoan|mat khau|quen mat khau)/.test(text)) {
-    return {
-      text: 'Bạn có thể đăng nhập hoặc tạo tài khoản để quản lý thông tin cá nhân và các đơn đặt phòng.',
-      action: { label: 'Đăng nhập', href: '/login' },
-    };
-  }
-
-  if (/(lien he|nhan vien|tu van|ho tro|gap nguoi|hotline|dien thoai|email)/.test(text)) {
-    return {
-      text: 'Đội ngũ hỗ trợ sẵn sàng giúp bạn. Gọi 1900 123 456 hoặc gửi email đến support@localvibe.vn.',
-      action: { label: 'Gọi hỗ trợ', href: 'tel:1900123456' },
-    };
-  }
-
-  return {
-    text: 'Mình có thể hỗ trợ tìm chỗ nghỉ, hướng dẫn đặt phòng, tra cứu đơn hoặc kết nối bạn với đội ngũ hỗ trợ. Bạn muốn hỏi về nội dung nào?',
-  };
-};
-
 export const CustomerSupportChat = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
+  const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const nextId = useRef(1);
@@ -101,7 +34,7 @@ export const CustomerSupportChat = () => {
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       inputRef.current?.focus();
     }
-  }, [isOpen, messages]);
+  }, [isOpen, messages, isSending]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -112,23 +45,51 @@ export const CustomerSupportChat = () => {
     return () => document.removeEventListener('keydown', closeOnEscape);
   }, [isOpen]);
 
-  const sendMessage = (value: string) => {
+  const sendMessage = async (value: string) => {
     const text = value.trim();
-    if (!text) return;
+    if (!text || isSending) return;
 
     const customerMessage: ChatMessage = { id: nextId.current++, role: 'customer', text };
-    const reply = getReply(text);
-    const assistantMessage: ChatMessage = { id: nextId.current++, role: 'assistant', ...reply };
-    setMessages(current => [...current, customerMessage, assistantMessage]);
+    const conversation = [
+      ...messages.filter(message => message.id !== 0).map(message => ({
+        role: message.role === 'customer' ? 'user' as const : 'assistant' as const,
+        content: message.text,
+      })),
+      { role: 'user' as const, content: text },
+    ].slice(-10);
+
+    setMessages(current => [...current, customerMessage]);
     setDraft('');
+    setIsSending(true);
+
+    try {
+      const { data } = await supportApi.chat(conversation);
+      setMessages(current => [...current, {
+        id: nextId.current++,
+        role: 'assistant',
+        text: data.reply,
+      }]);
+    } catch (error) {
+      const errorMessage = error instanceof Error
+        ? error.message
+        : 'Trợ lý AI hiện không kết nối được. Vui lòng thử lại sau.';
+      setMessages(current => [...current, {
+        id: nextId.current++,
+        role: 'assistant',
+        text: `${errorMessage} Bạn có thể thử lại sau hoặc tiếp tục tìm chỗ nghỉ trên trang web.`,
+      }]);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    sendMessage(draft);
+    void sendMessage(draft);
   };
 
   const resetChat = () => {
+    if (isSending) return;
     setMessages([welcomeMessage]);
     setDraft('');
     nextId.current = 1;
@@ -150,14 +111,15 @@ export const CustomerSupportChat = () => {
               </span>
               <div>
                 <h2 id="support-chat-title" className="font-semibold">Trợ lý sieuechxanh</h2>
-                <p className="mt-0.5 text-xs text-primary-100">Hỗ trợ tự động · Luôn sẵn sàng</p>
+                <p className="mt-0.5 text-xs text-primary-100">AI tự động · Không gửi thông tin nhạy cảm</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <button
                 type="button"
                 onClick={resetChat}
-                className="rounded-lg p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+                disabled={isSending}
+                className="rounded-lg p-2 text-white/80 transition hover:bg-white/10 hover:text-white disabled:opacity-50"
                 aria-label="Làm mới cuộc trò chuyện"
                 title="Làm mới cuộc trò chuyện"
               >
@@ -182,28 +144,18 @@ export const CustomerSupportChat = () => {
                     ? 'rounded-br-md bg-primary-600 text-white'
                     : 'rounded-bl-md border border-slate-100 bg-white text-slate-700 shadow-sm'
                 }`}>
-                  <p>{message.text}</p>
-                  {message.action && (
-                    message.action.href.startsWith('/') ? (
-                      <Link
-                        to={message.action.href}
-                        onClick={() => setIsOpen(false)}
-                        className="mt-3 inline-flex items-center rounded-lg bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 transition hover:bg-primary-100"
-                      >
-                        {message.action.label}
-                      </Link>
-                    ) : (
-                      <a
-                        href={message.action.href}
-                        className="mt-3 inline-flex items-center rounded-lg bg-primary-50 px-3 py-2 text-xs font-semibold text-primary-700 transition hover:bg-primary-100"
-                      >
-                        {message.action.label}
-                      </a>
-                    )
-                  )}
+                  <p className="whitespace-pre-wrap">{message.text}</p>
                 </div>
               </div>
             ))}
+
+            {isSending && (
+              <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
+                <div className="rounded-2xl rounded-bl-md border border-slate-100 bg-white px-3.5 py-3 text-sm text-slate-500 shadow-sm">
+                  Đang soạn câu trả lời...
+                </div>
+              </div>
+            )}
 
             {messages.length === 1 && (
               <div className="space-y-2 pl-1">
@@ -212,8 +164,9 @@ export const CustomerSupportChat = () => {
                   <button
                     key={label}
                     type="button"
-                    onClick={() => sendMessage(message)}
-                    className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700"
+                    onClick={() => void sendMessage(message)}
+                    disabled={isSending}
+                    className="flex w-full items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm font-medium text-slate-700 transition hover:border-primary-200 hover:bg-primary-50 hover:text-primary-700 disabled:opacity-50"
                   >
                     <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                     {label}
@@ -234,10 +187,12 @@ export const CustomerSupportChat = () => {
               placeholder="Nhập câu hỏi của bạn..."
               className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-primary-400 focus:bg-white focus:ring-2 focus:ring-primary-100"
               autoComplete="off"
+              maxLength={1000}
+              disabled={isSending}
             />
             <button
               type="submit"
-              disabled={!draft.trim()}
+              disabled={!draft.trim() || isSending}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-600 text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
               aria-label="Gửi tin nhắn"
             >

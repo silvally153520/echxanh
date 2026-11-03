@@ -134,3 +134,8 @@ export const adminApi = {
   getRevenue: (params?: Record<string, unknown>) =>
     api.get('/admin/revenue', { params }),
 };
+
+export const supportApi = {
+  chat: (messages: Array<{ role: 'user' | 'assistant'; content: string }>) =>
+    api.post<{ reply: string }>('/support/chat', { messages }),
+};

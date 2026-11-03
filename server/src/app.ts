@@ -10,6 +10,7 @@ import authRoutes from './routes/authRoutes';
 import propertyRoutes from './routes/propertyRoutes';
 import bookingRoutes from './routes/bookingRoutes';
 import adminRoutes from './routes/adminRoutes';
+import supportRoutes from './routes/supportRoutes';
 
 const app = express();
 
@@ -46,6 +47,15 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 app.use('/api/auth/forgot-password', authLimiter);
 
+const supportChatLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { error: 'Bạn đã gửi nhiều câu hỏi. Vui lòng thử lại sau.', code: 'SUPPORT_RATE_LIMIT' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/support/chat', supportChatLimiter);
+
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -67,6 +77,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/support', supportRoutes);
 
 // 404 handler
 app.use(notFoundHandler);
