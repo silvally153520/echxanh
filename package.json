@@ -21,7 +21,8 @@
     "test": "npm run test --workspaces"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "wrangler": "^4.157.0"
   },
   "engines": {
     "node": ">=20.0.0"
