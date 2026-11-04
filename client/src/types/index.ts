@@ -9,6 +9,14 @@ export interface User {
   createdAt: string;
 }
 
+export const PROPERTY_CATEGORY_LABELS = {
+  HOTEL: 'Khách sạn',
+  RESORT: 'Resort',
+  VILLA: 'Biệt thự',
+} as const;
+
+export type PropertyCategory = keyof typeof PROPERTY_CATEGORY_LABELS;
+
 export interface Property {
   id: string;
   hostId: string;
@@ -29,6 +37,7 @@ export interface Property {
   maxGuests: number;
   bedrooms: number;
   bathrooms: number;
+  category: PropertyCategory;
   amenities: string[];
   images: string[];
   status: 'DRAFT' | 'ACTIVE' | 'INACTIVE';

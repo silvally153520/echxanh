@@ -8,6 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
+import { FrogLogo } from '../../components/ui/FrogLogo';
 
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ'),
@@ -50,11 +51,7 @@ export const Login = () => {
       <Card className="w-full max-w-md" padding="lg">
         <div className="text-center mb-8">
           <Link to="/" className="inline-flex items-center gap-2 text-2xl font-bold text-primary-600 mb-6">
-            <svg className="w-10 h-10" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <path d="M16 2L4 8v16l12 6 12-6V8L16 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              <path d="M16 8v16" stroke="currentColor" strokeWidth="2" />
-              <path d="M8 14h16" stroke="currentColor" strokeWidth="2" />
-            </svg>
+            <FrogLogo className="h-10 w-10 rounded-xl bg-emerald-600 p-0.5 text-white" />
             <span>sieuechxanh</span>
           </Link>
           <h1 className="text-2xl font-bold text-slate-900">Chào mừng trở lại</h1>

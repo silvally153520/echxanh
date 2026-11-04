@@ -48,6 +48,12 @@ enum PropertyStatus {
   INACTIVE
 }
 
+enum PropertyCategory {
+  HOTEL
+  RESORT
+  VILLA
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -90,6 +96,7 @@ model Property {
   maxGuests       Int
   bedrooms        Int
   bathrooms       Int
+  category        PropertyCategory @default(HOTEL)
   amenities       String[]      // array of amenity IDs
   images          String[]      // array of image URLs
   status          PropertyStatus @default(DRAFT)
@@ -154,7 +161,7 @@ model Amenity {
 ### Properties
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
-| GET | /api/properties | List properties (with filters) | Public |
+| GET | /api/properties | List properties (filterable by category: HOTEL, RESORT, VILLA) | Public |
 | GET | /api/properties/:id | Get property details | Public |
 | GET | /api/properties/:id/availability | Check availability | Public |
 | POST | /api/properties | Create property | Host/Admin |

@@ -27,6 +27,12 @@ enum PropertyStatus {
   INACTIVE
 }
 
+enum PropertyCategory {
+  HOTEL
+  RESORT
+  VILLA
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -74,6 +80,7 @@ model Property {
   maxGuests       Int
   bedrooms        Int
   bathrooms       Int
+  category        PropertyCategory @default(HOTEL)
   amenities       String[]      // array of amenity IDs
   images          String[]      // array of image URLs
   status          PropertyStatus @default(DRAFT)

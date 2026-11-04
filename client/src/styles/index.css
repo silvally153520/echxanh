@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --color-primary: 0 127 194;
-    --color-primary-hover: 0 102 163;
+    --color-primary: 5 150 105;
+    --color-primary-hover: 4 120 87;
   }
 
   html {
@@ -13,7 +13,7 @@
   }
 
   body {
-    @apply font-sans text-slate-900 bg-slate-50 antialiased;
+    @apply font-sans text-slate-900 bg-[#fafaf7] antialiased;
   }
 
   * {
@@ -44,7 +44,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 active:bg-primary-800 shadow-sm;
+    @apply btn bg-primary-700 text-white hover:bg-primary-800 focus:ring-primary-500 active:bg-primary-900 shadow-sm;
   }
 
   .btn-secondary {
@@ -72,7 +72,7 @@
   }
 
   .input {
-    @apply w-full px-4 py-2.5 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed;
+    @apply w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed;
   }
 
   .input-error {
@@ -84,7 +84,7 @@
   }
 
   .card {
-    @apply bg-white rounded-xl shadow-card border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-card-hover;
+    @apply bg-white rounded-2xl shadow-card border border-slate-100 overflow-hidden transition-all duration-300 hover:shadow-card-hover;
   }
 
   .card-hover {

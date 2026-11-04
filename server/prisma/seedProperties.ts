@@ -400,6 +400,28 @@ const properties = [
 ];
 
 const additionalProperties = properties.slice(10);
+const villaTitles = new Set([
+  'Căn nhà nhỏ bên hồ Xuân Hương',
+  'Nhà nhỏ yên tĩnh tại Thảo Điền',
+  'Biệt thự sân vườn gần biển Mỹ Khê',
+  'Nhà vườn xanh ở ngoại ô Đà Lạt',
+  'Nhà cổ sân nhỏ gần phố đi bộ Hội An',
+  'Nhà vườn nhỏ bên dòng sông Hương',
+]);
+const resortTitles = new Set([
+  'Nhà gỗ nhỏ bên biển An Bàng',
+  'Căn hộ ngắm biển Mỹ Khê',
+  'Nhà nghỉ gia đình gần Bãi Sao',
+  'Bungalow vườn nhiệt đới Phú Quốc',
+  'Căn hộ tiện nghi gần biển Nha Trang',
+  'Nhà nghỉ miệt vườn gần chợ nổi',
+  'Nhà sàn ấm áp giữa núi rừng Sa Pa',
+  'Căn hộ nghỉ dưỡng nhìn vịnh Hạ Long',
+]);
+
+const getPropertyCategory = (title: string) => (
+  villaTitles.has(title) ? 'VILLA' : resortTitles.has(title) ? 'RESORT' : 'HOTEL'
+);
 
 const seedProperties = async () => {
   const hostPasswordHash = await bcrypt.hash(randomBytes(32).toString('hex'), 12);
@@ -415,6 +437,11 @@ const seedProperties = async () => {
     select: { id: true },
   });
 
+  await prisma.$transaction(properties.map(property => prisma.property.updateMany({
+    where: { title: property.title, city: property.city },
+    data: { category: getPropertyCategory(property.title) },
+  })));
+
   let created = 0;
   for (const property of additionalProperties) {
     const existing = await prisma.property.findFirst({
@@ -429,6 +456,7 @@ const seedProperties = async () => {
         ...property,
         hostId: host.id,
         country: 'Việt Nam',
+        category: getPropertyCategory(property.title),
         images: [],
         status: 'ACTIVE',
       },

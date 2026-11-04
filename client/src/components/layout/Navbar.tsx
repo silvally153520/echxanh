@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, LogOut, LayoutDashboard, Home, Heart, ChevronDown, Plus, ShieldCheck, Globe2, CalendarDays, UserRound } from 'lucide-react';
+import { Menu, X, LogOut, LayoutDashboard, Home, Heart, ChevronDown, Plus, ShieldCheck, Globe2, CalendarDays, UserRound, Building2, Waves, House } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUIStore } from '../../store/uiStore';
 import { Button } from '../ui/Button';
 import { Badge } from '../ui/Badge';
+import { FrogLogo } from '../ui/FrogLogo';
 
 export const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
@@ -42,9 +43,15 @@ export const Navbar = () => {
   }, [isUserMenuOpen]);
 
   const navLinks = [
-    { path: '/', label: 'Trang chủ', icon: Home },
-    { path: '/properties', label: 'Tìm phòng', icon: Heart },
+    { path: '/', label: 'Trang chủ', icon: Home, category: undefined },
+    { path: '/properties', label: 'Tìm phòng', icon: Heart, category: undefined },
   ];
+  const categoryLinks = [
+    { path: '/properties?category=HOTEL', label: 'Khách sạn', category: 'HOTEL', icon: Building2 },
+    { path: '/properties?category=RESORT', label: 'Resort', category: 'RESORT', icon: Waves },
+    { path: '/properties?category=VILLA', label: 'Biệt thự', category: 'VILLA', icon: House },
+  ];
+  const activeCategory = new URLSearchParams(location.search).get('category');
 
   const userLinks = user?.role === 'ADMIN' ? [
     { path: '/admin', label: 'Quản trị', icon: ShieldCheck },
@@ -69,42 +76,39 @@ export const Navbar = () => {
   return (
     <header className={isHomePage
       ? 'absolute inset-x-0 top-0 z-40 border-b border-white/10 bg-transparent'
-      : 'sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur-sm'}
+      : 'sticky top-0 z-40 border-b border-stone-200/80 bg-[#fafaf7]/95 backdrop-blur-xl'}
     >
       <nav className="container-main" aria-label="Main navigation">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link to="/" className={`flex items-center gap-2 text-xl font-bold ${isHomePage ? 'text-white' : 'text-primary-600'}`} aria-label="sieuechxanh trang chủ">
-            <span className={isHomePage ? 'flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500' : ''}>
-            <svg className="h-8 w-8" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <path d="M16 2L4 8v16l12 6 12-6V8L16 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-              <path d="M16 8v16" stroke="currentColor" strokeWidth="2" />
-              <path d="M8 14h16" stroke="currentColor" strokeWidth="2" />
-            </svg>
+          <Link to="/" className={`flex items-center gap-2 text-xl font-bold tracking-tight ${isHomePage ? 'text-white' : 'text-emerald-800'}`} aria-label="sieuechxanh trang chủ">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white">
+              <FrogLogo className="h-8 w-8" />
             </span>
-            <span className="hidden sm:block">sieuechxanh</span>
+            <span>sieuechxanh</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            {isHomePage ? ['Khách sạn', 'Resort', 'Biệt thự'].map(label => (
-              <Link key={label} to="/properties" className="rounded-lg px-4 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-white">
-                {label}
-              </Link>
-            )) : navLinks.map(({ path, label, icon: Icon }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === path
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <Icon className="w-4 h-4" aria-hidden="true" />
-                {label}
-              </Link>
-            ))}
+            {categoryLinks.map(({ path, label, category }) => {
+              const isActive = category
+                ? location.pathname === '/properties' && activeCategory === category
+                : false;
+              return (
+                <Link
+                  key={path}
+                  to={path}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                    isHomePage
+                      ? 'text-white/90 hover:bg-white/10 hover:text-white'
+                      : isActive ? 'bg-emerald-50 text-emerald-800' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  }`}
+                >
+                  {label}
+                </Link>
+              );
+            })}
           </div>
 
           {/* Right side - Auth/User */}
@@ -142,7 +146,7 @@ export const Navbar = () => {
                     {user?.avatar ? (
                       <img src={user.avatar} alt="" className="h-8 w-8 rounded-full object-cover" />
                     ) : (
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-700">
                         <span className="text-sm font-bold text-white">
                           {user?.name?.charAt(0).toUpperCase()}
                         </span>
@@ -158,7 +162,7 @@ export const Navbar = () => {
                           key={path}
                           to={path}
                           onClick={() => setIsUserMenuOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-slate-50 hover:text-sky-700 ${index >= 2 ? 'border-t border-slate-100' : ''}`}
+                          className={`flex items-center gap-3 px-4 py-3 text-sm transition hover:bg-emerald-50 hover:text-emerald-800 ${index >= 2 ? 'border-t border-slate-100' : ''}`}
                         >
                           <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                           {label}
@@ -178,7 +182,7 @@ export const Navbar = () => {
                 {isHomePage ? (
                   <>
                     <button type="button" className="px-3 py-2 text-sm font-semibold text-white transition hover:text-sky-200" onClick={() => navigate('/login')}>Đăng nhập</button>
-                    <button type="button" className="rounded-lg bg-sky-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-600" onClick={() => navigate('/register')}>Đăng ký</button>
+                    <button type="button" className="rounded-full bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700" onClick={() => navigate('/register')}>Đăng ký</button>
                   </>
                 ) : (
                   <>
@@ -215,24 +219,26 @@ export const Navbar = () => {
         >
           <div className="border-t border-slate-200 pt-4">
             <div className="flex flex-col gap-1 mb-4">
-              {(isHomePage ? [
-                { path: '/', label: 'Trang chủ', icon: Home },
-                { path: '/properties', label: 'Khách sạn, resort & biệt thự', icon: Heart },
-              ] : navLinks).map(({ path, label, icon: Icon }) => (
+              {(isHomePage ? [{ path: '/', label: 'Trang chủ', icon: Home, category: undefined }, ...categoryLinks] : [...navLinks, ...categoryLinks]).map(({ path, label, icon: Icon, category }) => {
+                const isActive = category
+                  ? location.pathname === '/properties' && activeCategory === category
+                  : location.pathname === path && (path !== '/properties' || !activeCategory);
+                return (
                 <Link
                   key={path}
                   to={path}
                   onClick={closeMobileMenu}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-base font-medium ${
-                    location.pathname === path
-                      ? 'bg-primary-50 text-primary-700'
+                    isActive
+                      ? 'bg-emerald-50 text-emerald-800'
                       : 'text-slate-600 hover:bg-slate-100'
                   }`}
                 >
                   <Icon className="w-5 h-5" aria-hidden="true" />
                   {label}
                 </Link>
-              ))}
+                );
+              })}
             </div>
 
             {isAuthenticated ? (

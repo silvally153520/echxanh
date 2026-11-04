@@ -21,6 +21,10 @@ const buildPropertyWhere = (query: PropertyQuery) => {
     where.country = { contains: normalizeSearchText(query.country), mode: 'insensitive' };
   }
 
+  if (query.category === 'HOTEL' || query.category === 'RESORT' || query.category === 'VILLA') {
+    where.category = query.category;
+  }
+
   if (query.minPrice || query.maxPrice) {
     where.pricePerNight = {};
     if (query.minPrice) where.pricePerNight.gte = Number(query.minPrice);
@@ -234,6 +238,7 @@ export const createProperty = asyncHandler(async (req: AuthRequest, res: Respons
     maxGuests,
     bedrooms,
     bathrooms,
+    category,
     amenities = [],
     images = [],
   } = req.body;
@@ -252,6 +257,7 @@ export const createProperty = asyncHandler(async (req: AuthRequest, res: Respons
       maxGuests,
       bedrooms,
       bathrooms,
+      category,
       amenities,
       images,
       status: 'DRAFT',

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Twitter, Youtube, Mail, MapPin, Phone, Heart } from 'lucide-react';
+import { FrogLogo } from '../ui/FrogLogo';
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -45,17 +46,15 @@ export const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[#102a43] text-slate-300" role="contentinfo">
+    <footer className="bg-[#12382d] text-slate-300" role="contentinfo">
       <div className="container-main py-16 lg:py-24">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
           {/* Brand */}
           <div className="col-span-2 lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 text-xl font-bold text-white mb-4" aria-label="sieuechxanh trang chủ">
-              <svg className="w-8 h-8 text-primary-400" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-                <path d="M16 2L4 8v16l12 6 12-6V8L16 2z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-                <path d="M16 8v16" stroke="currentColor" strokeWidth="2" />
-                <path d="M8 14h16" stroke="currentColor" strokeWidth="2" />
-              </svg>
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white">
+                <FrogLogo className="h-8 w-8" />
+              </span>
               <span>sieuechxanh</span>
             </Link>
             <p className="text-slate-400 mb-6 max-w-xs">
@@ -69,7 +68,7 @@ export const Footer = () => {
                   href={href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 rounded-lg bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white transition-colors"
+                  className="p-2 rounded-xl bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white transition-colors"
                   aria-label={label}
                 >
                   <Icon className="w-5 h-5" aria-hidden="true" />

@@ -3,7 +3,7 @@ import { CalendarDays, MapPin, Search, SlidersHorizontal, Users } from 'lucide-r
 import { useSearchParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { propertiesApi } from '../services/api';
-import type { Property } from '../types';
+import { PROPERTY_CATEGORY_LABELS, type Property, type PropertyCategory } from '../types';
 import { EmptyState, formatPrice, PropertyCard } from './shared';
 
 const amenityOptions = ['Wi-Fi', 'Điều hòa', 'Bếp', 'Ban công', 'Bãi đỗ xe', 'Hồ bơi', 'Bàn làm việc', 'Bữa sáng'];
@@ -22,6 +22,10 @@ export const Properties = () => {
   const [properties, setProperties] = useState<Property[]>([]);
   const [total, setTotal] = useState(0);
   const [city, setCity] = useState(searchParams.get('city')?.normalize('NFC').trim() || '');
+  const categoryParam = searchParams.get('category');
+  const category = categoryParam && Object.prototype.hasOwnProperty.call(PROPERTY_CATEGORY_LABELS, categoryParam)
+    ? categoryParam as PropertyCategory
+    : null;
   const [checkIn, setCheckIn] = useState(dateForInput(searchParams.get('checkIn')) || defaultCheckIn);
   const [checkOut, setCheckOut] = useState(dateForInput(searchParams.get('checkOut')) || defaultCheckOut);
   const [guests, setGuests] = useState(Number(searchParams.get('guests')) || 2);
@@ -35,6 +39,7 @@ export const Properties = () => {
     setLoading(true);
     propertiesApi.getAll({
       city: searchParams.get('city')?.normalize('NFC').trim() || undefined,
+      category: searchParams.get('category') || undefined,
       checkIn: searchParams.get('checkIn') || toIsoDate(defaultCheckIn),
       checkOut: searchParams.get('checkOut') || toIsoDate(defaultCheckOut),
       guests: Number(searchParams.get('guests')) || undefined,
@@ -57,6 +62,7 @@ export const Properties = () => {
     const params = new URLSearchParams();
     const trimmedCity = city.normalize('NFC').trim();
     if (trimmedCity) params.set('city', trimmedCity);
+    if (category) params.set('category', category);
     if (checkIn && checkOut) {
       params.set('checkIn', toIsoDate(checkIn));
       params.set('checkOut', toIsoDate(checkOut));
@@ -179,7 +185,7 @@ export const Properties = () => {
           <section aria-label="Danh sách chỗ nghỉ">
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">{loading ? 'Đang tìm chỗ nghỉ…' : `${total} chỗ nghỉ`}</h2>
+                <h2 className="text-xl font-bold text-slate-900">{loading ? 'Đang tìm chỗ nghỉ…' : `${total} ${category ? PROPERTY_CATEGORY_LABELS[category].toLocaleLowerCase('vi') : 'chỗ nghỉ'}`}</h2>
                 {searchParams.get('city') && <p className="mt-1 text-sm text-slate-500">Tại {searchParams.get('city')}</p>}
               </div>
               <label className="flex items-center gap-2 text-sm text-slate-500">

@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { propertiesApi } from '../../services/api';
+import { PROPERTY_CATEGORY_LABELS, type PropertyCategory } from '../../types';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { PageHeader } from '../shared';
@@ -10,11 +11,13 @@ type FormFields = {
   title: string; description: string; address: string; city: string; country: string;
   latitude: string; longitude: string; pricePerNight: string; maxGuests: string;
   bedrooms: string; bathrooms: string; amenities: string; images: string; status: string;
+  category: PropertyCategory;
 };
 const emptyForm: FormFields = {
   title: '', description: '', address: '', city: '', country: 'Việt Nam',
   latitude: '10.8231', longitude: '106.6297', pricePerNight: '', maxGuests: '2',
   bedrooms: '1', bathrooms: '1', amenities: '', images: '', status: 'DRAFT',
+  category: 'HOTEL',
 };
 
 export const HostPropertyForm = () => {
@@ -34,7 +37,7 @@ export const HostPropertyForm = () => {
         longitude: String(property.longitude), pricePerNight: String(property.pricePerNight),
         maxGuests: String(property.maxGuests), bedrooms: String(property.bedrooms),
         bathrooms: String(property.bathrooms), amenities: property.amenities.join(', '),
-        images: property.images.join('\n'), status: property.status,
+        images: property.images.join('\n'), status: property.status, category: property.category,
       });
     }).catch(() => toast.error('Không thể tải chỗ nghỉ.')).finally(() => setLoading(false));
   }, [id]);
@@ -48,6 +51,7 @@ export const HostPropertyForm = () => {
       city: form.city.trim(), country: form.country.trim(), latitude: Number(form.latitude),
       longitude: Number(form.longitude), pricePerNight: Number(form.pricePerNight),
       maxGuests: Number(form.maxGuests), bedrooms: Number(form.bedrooms), bathrooms: Number(form.bathrooms),
+      category: form.category,
       amenities: form.amenities.split(',').map(value => value.trim()).filter(Boolean),
       images: form.images.split('\n').map(value => value.trim()).filter(Boolean),
       ...(id ? { status: form.status } : {}),
@@ -79,6 +83,7 @@ export const HostPropertyForm = () => {
         <Input label="Số khách tối đa" type="number" min={1} value={form.maxGuests} onChange={event => setField('maxGuests', event.target.value)} required />
         <Input label="Phòng ngủ" type="number" min={0} value={form.bedrooms} onChange={event => setField('bedrooms', event.target.value)} required />
         <Input label="Phòng tắm" type="number" min={0} value={form.bathrooms} onChange={event => setField('bathrooms', event.target.value)} required />
+        <label className="block text-sm font-medium">Loại chỗ nghỉ<select className="input mt-1" value={form.category} onChange={event => setField('category', event.target.value)}>{Object.entries(PROPERTY_CATEGORY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
         <Input label="Vĩ độ" type="number" step="any" value={form.latitude} onChange={event => setField('latitude', event.target.value)} required />
         <Input label="Kinh độ" type="number" step="any" value={form.longitude} onChange={event => setField('longitude', event.target.value)} required />
         <label className="block text-sm font-medium sm:col-span-2">Mô tả<textarea className="input mt-1 min-h-32" value={form.description} onChange={event => setField('description', event.target.value)} minLength={20} maxLength={5000} required /></label>

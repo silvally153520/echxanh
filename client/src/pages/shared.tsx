@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Star } from 'lucide-react';
-import type { Booking, Property } from '../types';
+import { PROPERTY_CATEGORY_LABELS, type Booking, type Property } from '../types';
 
 export const PageHeader = ({ title, description, action }: {
   title: string;
@@ -72,7 +72,7 @@ export const PropertyCard = ({ property }: { property: Property }) => {
   const isSampleImage = !property.images?.[0];
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <article className="group overflow-hidden rounded-3xl border border-stone-200/80 bg-white shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-card-hover">
       <Link to={`/properties/${property.id}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
         <img
           src={image}
@@ -82,6 +82,9 @@ export const PropertyCard = ({ property }: { property: Property }) => {
           className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
         {isSampleImage && <span className="absolute bottom-3 left-3 rounded-full bg-slate-950/55 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">Ảnh minh họa</span>}
+        <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-slate-800 shadow-sm">
+          {PROPERTY_CATEGORY_LABELS[property.category]}
+        </span>
         {property.averageRating ? (
           <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-sm font-semibold text-slate-900 shadow-sm">
             <Star className="h-4 w-4 fill-amber-400 text-amber-400" aria-hidden="true" />
@@ -96,12 +99,12 @@ export const PropertyCard = ({ property }: { property: Property }) => {
               <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
               <span className="truncate">{property.city}, {property.country}</span>
             </p>
-            <Link to={`/properties/${property.id}`} className="mt-1 block truncate text-base font-semibold text-slate-900 transition hover:text-sky-600">
+            <Link to={`/properties/${property.id}`} className="mt-1 block truncate text-base font-semibold text-slate-900 transition hover:text-emerald-700">
               {property.title}
             </Link>
           </div>
           {property.reviewCount ? (
-            <span className="shrink-0 rounded-md bg-sky-500 px-2 py-1 text-xs font-bold text-white">{property.reviewCount} đánh giá</span>
+            <span className="shrink-0 rounded-md bg-emerald-700 px-2 py-1 text-xs font-bold text-white">{property.reviewCount} đánh giá</span>
           ) : null}
         </div>
         {property.amenities.length > 0 && (
@@ -116,7 +119,7 @@ export const PropertyCard = ({ property }: { property: Property }) => {
             <span className="block text-xs text-slate-400">Giá mỗi đêm</span>
             <span className="mt-0.5 font-bold text-slate-900">{formatPrice(property.pricePerNight)}</span>
           </div>
-          <Link to={`/properties/${property.id}`} className="text-sm font-semibold text-sky-600 transition hover:text-sky-700">
+          <Link to={`/properties/${property.id}`} className="text-sm font-semibold text-emerald-700 transition hover:text-emerald-800">
             Xem chi tiết <span aria-hidden="true">→</span>
           </Link>
         </div>
